@@ -229,13 +229,13 @@ async def login_user(login_data: UserLogin):
 
 @api_router.get("/gifts/{category}")
 async def get_gifts_by_category(category: str):
-    gifts = await db.gifts.find({"category": category}).to_list(1000)
+    gifts = await db.gifts.find({"category": category}, {"_id": 0}).to_list(1000)
     if not gifts:
         return []
     
     # Get reservations to check availability
     gift_ids = [gift["id"] for gift in gifts]
-    reservations = await db.reservations.find({"gift_id": {"$in": gift_ids}}).to_list(1000)
+    reservations = await db.reservations.find({"gift_id": {"$in": gift_ids}}, {"_id": 0}).to_list(1000)
     
     reservation_counts = {}
     for reservation in reservations:
