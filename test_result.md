@@ -283,3 +283,5 @@ test_plan:
 agent_communication:
     - agent: "main"
       message: "Implementei sistema completo de chá de bebê com todas as funcionalidades solicitadas. Backend tem 6 endpoints principais: registro, login, presentes por categoria, reserva, dashboard admin e inicialização de dados. Frontend tem fluxo completo: cadastro/login -> página principal com categorias -> seleção de presentes -> dashboard admin. Preciso testar backend primeiro para garantir que APIs estão funcionando corretamente."
+    - agent: "testing"
+      message: "✅ BACKEND TESTING COMPLETE: Testei sistematicamente todos os 6 endpoints do backend. Encontrei e corrigi 2 bugs de serialização JSON (ObjectId não serializável). Todos os endpoints estão funcionando perfeitamente: 1) Cadastro com validação WhatsApp ✅ 2) Login por nome+WhatsApp ✅ 3) Presentes por categoria com disponibilidade ✅ 4) Reserva com controle de estoque ✅ 5) Dashboard admin com estatísticas ✅ 6) Inicialização automática de 12 presentes ✅. Sistema pronto para uso no chá de bebê das gêmeas Isadora e Isabelle!"
