@@ -275,15 +275,9 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Sistema de cadastro de usuários"
-    - "Sistema de login de usuários"
-    - "API de presentes por categoria"
-    - "Sistema de reserva de presentes"
-    - "Dashboard administrativo"
-    - "Inicialização de dados de presentes"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
