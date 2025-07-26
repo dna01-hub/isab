@@ -254,7 +254,24 @@ async def get_gifts_by_category(category: str):
 @api_router.get("/gifts")
 async def get_all_gifts():
     gifts = await db.gifts.find({}, {"_id": 0}).to_list(1000)
-    return [Gift(**gift) for gift in gifts]
+    
+    # Get reservations to check availability
+    gift_ids = [gift["id"] for gift in gifts]
+    reservations = await db.reservations.find({"gift_id": {"$in": gift_ids}}, {"_id": 0}).to_list(1000)
+    
+    reservation_counts = {}
+    for reservation in reservations:
+        gift_id = reservation["gift_id"]
+        reservation_counts[gift_id] = reservation_counts.get(gift_id, 0) + reservation["quantity"]
+    
+    # Add availability info to gifts
+    for gift in gifts:
+        gift_id = gift["id"]
+        reserved_qty = reservation_counts.get(gift_id, 0)
+        gift["available_quantity"] = gift["quantity"] - reserved_qty
+        gift["is_available"] = gift["available_quantity"] > 0
+    
+    return gifts
 
 @api_router.post("/reserve-gift")
 async def reserve_gift(reservation_data: dict):
