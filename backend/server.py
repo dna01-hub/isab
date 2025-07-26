@@ -220,7 +220,7 @@ async def login_user(login_data: UserLogin):
     user = await db.users.find_one({
         "name": login_data.name,
         "whatsapp": login_data.whatsapp
-    })
+    }, {"_id": 0})
     
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
