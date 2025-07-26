@@ -249,7 +249,7 @@ async def get_gifts_by_category(category: str):
         gift["available_quantity"] = gift["quantity"] - reserved_qty
         gift["is_available"] = gift["available_quantity"] > 0
     
-    return [Gift(**gift) for gift in gifts]
+    return gifts
 
 @api_router.get("/gifts")
 async def get_all_gifts():
