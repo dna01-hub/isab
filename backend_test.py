@@ -106,10 +106,10 @@ class BabyShowerTester:
         """Test POST /api/login endpoint"""
         print("\n=== Testing User Login ===")
         
-        # Test valid login
+        # Test valid login with the user we just registered
         login_data = {
-            "name": "Maria Silva",
-            "whatsapp": "(11) 99999-8888"
+            "name": getattr(self, 'test_user_name', 'Maria Silva'),
+            "whatsapp": getattr(self, 'test_user_whatsapp', '(11) 99999-8888')
         }
         
         try:
