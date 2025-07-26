@@ -1083,6 +1083,22 @@ const AdminDashboard = () => {
     </div>
   );
 };
+
+// Main App Component  
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/admin" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/*" element={<MainApp />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// Main Application Logic
+function MainApp() {
   const [currentPage, setCurrentPage] = useState('register');
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
