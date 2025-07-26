@@ -314,14 +314,14 @@ async def admin_login(credentials: dict):
 @api_router.get("/admin/dashboard")
 async def get_admin_dashboard():
     # Get all users
-    users = await db.users.find().to_list(1000)
+    users = await db.users.find({}, {"_id": 0}).to_list(1000)
     total_confirmed = len(users)
     total_companions = sum(len(user.get("companions", [])) for user in users)
     total_attendees = total_confirmed + total_companions
     
     # Get all reservations with user and gift details
-    reservations = await db.reservations.find().to_list(1000)
-    gifts = await db.gifts.find().to_list(1000)
+    reservations = await db.reservations.find({}, {"_id": 0}).to_list(1000)
+    gifts = await db.gifts.find({}, {"_id": 0}).to_list(1000)
     
     gift_dict = {gift["id"]: gift for gift in gifts}
     user_dict = {user["id"]: user for user in users}
