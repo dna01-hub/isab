@@ -263,7 +263,7 @@ async def reserve_gift(reservation_data: dict):
     quantity = reservation_data.get("quantity", 1)
     
     # Check if gift exists
-    gift = await db.gifts.find_one({"id": gift_id})
+    gift = await db.gifts.find_one({"id": gift_id}, {"_id": 0})
     if not gift:
         raise HTTPException(status_code=404, detail="Presente não encontrado")
     
