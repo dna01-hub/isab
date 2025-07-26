@@ -268,7 +268,7 @@ async def reserve_gift(reservation_data: dict):
         raise HTTPException(status_code=404, detail="Presente não encontrado")
     
     # Check availability
-    existing_reservations = await db.reservations.find({"gift_id": gift_id}).to_list(1000)
+    existing_reservations = await db.reservations.find({"gift_id": gift_id}, {"_id": 0}).to_list(1000)
     total_reserved = sum(res["quantity"] for res in existing_reservations)
     
     if total_reserved + quantity > gift["quantity"]:
