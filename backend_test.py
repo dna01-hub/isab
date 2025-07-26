@@ -38,10 +38,14 @@ class BabyShowerTester:
         """Test POST /api/register endpoint"""
         print("\n=== Testing User Registration ===")
         
+        # Generate unique user data with timestamp
+        import time
+        timestamp = str(int(time.time()))
+        
         # Test valid registration
         user_data = {
-            "name": "Maria Silva",
-            "whatsapp": "(11) 99999-8888",
+            "name": f"Maria Silva {timestamp}",
+            "whatsapp": f"(11) 9999{timestamp[-4:]}",
             "companions": ["João Silva", "Ana Silva"],
             "stay_connected": True
         }
@@ -93,6 +97,10 @@ class BabyShowerTester:
         except Exception as e:
             self.log_test("User Registration - Invalid WhatsApp", False, 
                         f"Request failed: {str(e)}")
+        
+        # Store user data for login test
+        self.test_user_name = user_data["name"]
+        self.test_user_whatsapp = user_data["whatsapp"]
     
     def test_user_login(self):
         """Test POST /api/login endpoint"""
