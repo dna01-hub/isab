@@ -727,8 +727,362 @@ const EventPage = ({ user, onLogout }) => {
   );
 };
 
-// Main App Component
-function App() {
+// Admin Login Page Component
+const AdminLoginPage = () => {
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      await axios.post(`${API}/admin/login`, credentials);
+      const dashboardResponse = await axios.get(`${API}/admin/dashboard`);
+      
+      // Store admin session
+      localStorage.setItem('adminSession', JSON.stringify({
+        loggedIn: true,
+        data: dashboardResponse.data,
+        timestamp: new Date().getTime()
+      }));
+      
+      navigate('/admin/dashboard');
+    } catch (error) {
+      alert('Credenciais inválidas. Verifique usuário e senha.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-slate-50 to-gray-200 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="relative mb-6">
+            <div className="w-24 h-24 bg-gradient-to-r from-gray-600 to-gray-800 rounded-full mx-auto flex items-center justify-center shadow-2xl">
+              <span className="text-4xl text-white">🔐</span>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Painel Administrativo
+          </h1>
+          <p className="text-gray-600">Chá de Bebê - Isadora & Isabelle</p>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <form onSubmit={handleAdminLogin} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Usuário
+              </label>
+              <input
+                type="text"
+                value={credentials.username}
+                onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-300"
+                placeholder="Digite o usuário"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Senha
+              </label>
+              <input
+                type="password"
+                value={credentials.password}
+                onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-300"
+                placeholder="Digite a senha"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-gray-600 to-gray-800 text-white py-4 rounded-xl font-semibold text-lg hover:from-gray-700 hover:to-gray-900 transform hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Entrando...' : 'Acessar Painel'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => navigate('/')}
+              className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center justify-center space-x-2"
+            >
+              <span>←</span>
+              <span>Voltar ao Site</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="text-center mt-6 text-gray-500 text-sm">
+          <p>Acesso restrito aos organizadores do evento</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Admin Dashboard Component
+const AdminDashboard = () => {
+  const [adminData, setAdminData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check admin session and load data
+    const adminSession = localStorage.getItem('adminSession');
+    if (!adminSession) {
+      navigate('/admin');
+      return;
+    }
+
+    try {
+      const session = JSON.parse(adminSession);
+      if (session.loggedIn && session.data) {
+        // Check if session is not too old (2 hours)
+        const now = new Date().getTime();
+        if (now - session.timestamp < 2 * 60 * 60 * 1000) {
+          setAdminData(session.data);
+          setIsLoading(false);
+        } else {
+          // Session expired
+          handleLogout();
+        }
+      } else {
+        navigate('/admin');
+      }
+    } catch (error) {
+      navigate('/admin');
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminSession');
+    navigate('/admin');
+  };
+
+  const refreshData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`${API}/admin/dashboard`);
+      setAdminData(response.data);
+      
+      // Update stored session
+      localStorage.setItem('adminSession', JSON.stringify({
+        loggedIn: true,
+        data: response.data,
+        timestamp: new Date().getTime()
+      }));
+    } catch (error) {
+      alert('Erro ao atualizar dados. Faça login novamente.');
+      handleLogout();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading || !adminData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando painel administrativo...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-3xl shadow-xl p-6 mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                🎀 Dashboard Administrativo
+              </h1>
+              <p className="text-gray-600">
+                Chá de Bebê - Isadora & Isabelle • Atualizado: {new Date().toLocaleString('pt-BR')}
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={refreshData}
+                disabled={isLoading}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+              >
+                🔄 Atualizar
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                🏠 Site Principal
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                🚪 Sair
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-pink-400 to-pink-600 p-6 rounded-2xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">{adminData.total_confirmed}</h3>
+                <p className="text-pink-100 font-medium">Confirmados</p>
+              </div>
+              <span className="text-4xl opacity-80">👥</span>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-400 to-purple-600 p-6 rounded-2xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">{adminData.total_companions}</h3>
+                <p className="text-purple-100 font-medium">Acompanhantes</p>
+              </div>
+              <span className="text-4xl opacity-80">👫</span>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-blue-400 to-blue-600 p-6 rounded-2xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">{adminData.total_attendees}</h3>
+                <p className="text-blue-100 font-medium">Total Pessoas</p>
+              </div>
+              <span className="text-4xl opacity-80">🎉</span>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-green-400 to-green-600 p-6 rounded-2xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">{adminData.total_gifts_reserved}</h3>
+                <p className="text-green-100 font-medium">Presentes Reservados</p>
+              </div>
+              <span className="text-4xl opacity-80">🎁</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Confirmed Guests */}
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+              <span className="mr-3">👥</span>
+              Convidados Confirmados ({adminData.total_confirmed})
+            </h2>
+            <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-4">
+              {adminData.users.map((user, index) => (
+                <div key={index} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-800">{user.name}</h3>
+                      <p className="text-sm text-gray-600 flex items-center mt-1">
+                        <span className="mr-1">📱</span>
+                        {user.whatsapp}
+                      </p>
+                      {user.companions && user.companions.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-gray-700">Acompanhantes:</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {user.companions.map((companion, i) => (
+                              <span key={i} className="inline-block bg-pink-100 text-pink-800 px-2 py-1 rounded-lg text-xs">
+                                {companion}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded-lg text-xs font-medium">
+                        ✅ Confirmado
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Reserved Gifts */}
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+              <span className="mr-3">🎁</span>
+              Presentes Reservados ({adminData.total_gifts_reserved})
+            </h2>
+            <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-4">
+              {adminData.reservations.map((reservation, index) => (
+                <div key={index} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-800">{reservation.gift_name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        <span className="font-medium">Por:</span> {reservation.user_name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Qtd: {reservation.quantity} • {new Date(reservation.reserved_at).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                    <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded-lg text-xs font-medium">
+                      📦 Reservado
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Available Gifts */}
+        <div className="mt-8 bg-white rounded-3xl shadow-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span className="mr-3">📋</span>
+            Presentes Ainda Disponíveis ({adminData.available_gifts.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {adminData.available_gifts.map((gift, index) => (
+              <div key={index} className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                <h3 className="font-bold text-gray-800">{gift.name}</h3>
+                <p className="text-sm text-blue-600 mt-1">
+                  Disponível: {gift.available_quantity}
+                </p>
+              </div>
+            ))}
+          </div>
+          {adminData.available_gifts.length === 0 && (
+            <div className="text-center py-8">
+              <span className="text-6xl mb-4 block">🎉</span>
+              <p className="text-xl font-bold text-gray-800">
+                Todos os presentes foram reservados!
+              </p>
+              <p className="text-gray-600 mt-2">
+                Parabéns! O chá de bebê foi um sucesso!
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
   const [currentPage, setCurrentPage] = useState('register');
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
