@@ -286,11 +286,11 @@ async def reserve_gift(reservation_data: dict):
 
 @api_router.get("/user/{user_id}/reservations")
 async def get_user_reservations(user_id: str):
-    reservations = await db.reservations.find({"user_id": user_id}).to_list(1000)
+    reservations = await db.reservations.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
     # Get gift details for each reservation
     gift_ids = [res["gift_id"] for res in reservations]
-    gifts = await db.gifts.find({"id": {"$in": gift_ids}}).to_list(1000)
+    gifts = await db.gifts.find({"id": {"$in": gift_ids}}, {"_id": 0}).to_list(1000)
     gift_dict = {gift["id"]: gift for gift in gifts}
     
     detailed_reservations = []
