@@ -238,6 +238,15 @@ const RegistrationPage = ({ onRegister, onSwitchToLogin }) => {
           <p className="text-sm">
             Contato: Daniel • (69) 99226-5294
           </p>
+          <div className="mt-4">
+            <a 
+              href="/admin"
+              className="inline-flex items-center space-x-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <span>🔐</span>
+              <span>Painel Admin</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
