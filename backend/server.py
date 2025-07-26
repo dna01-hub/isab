@@ -253,7 +253,7 @@ async def get_gifts_by_category(category: str):
 
 @api_router.get("/gifts")
 async def get_all_gifts():
-    gifts = await db.gifts.find().to_list(1000)
+    gifts = await db.gifts.find({}, {"_id": 0}).to_list(1000)
     return [Gift(**gift) for gift in gifts]
 
 @api_router.post("/reserve-gift")
