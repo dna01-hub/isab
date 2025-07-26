@@ -207,7 +207,7 @@ async def register_user(user_data: UserCreate):
         raise HTTPException(status_code=400, detail="Formato de WhatsApp inválido")
     
     # Check if user already exists
-    existing_user = await db.users.find_one({"whatsapp": user_data.whatsapp})
+    existing_user = await db.users.find_one({"whatsapp": user_data.whatsapp}, {"_id": 0})
     if existing_user:
         raise HTTPException(status_code=400, detail="WhatsApp já cadastrado")
     
